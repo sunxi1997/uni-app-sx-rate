@@ -152,7 +152,7 @@
 </script>
 
 <style scoped>
-  @import "../../static/iconfont-rate/iconfont.css";
+  @import "../../static/sx-rate/iconfont.css";
 </style>
 
 <style scoped>
