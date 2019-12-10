@@ -13,6 +13,7 @@
       :class="{scale: !disabled && val<=rateValue && animation && touchMoving}"
       :data-val="val"
       @click="onItemClick"
+      :ref="refNameSt+i"
     >
       <text class="iconfont icon-star" />
     </view>
@@ -69,7 +70,10 @@
     data() {
       return {
         rateValue: 0,
-        touchMoving: false
+        touchMoving: false,
+        refNameSt:'mmmStart',
+        startX:[],
+        startW:30,
       }
     },
     computed: {
@@ -106,6 +110,14 @@
         immediate: true
       }
     },
+    mounted() {
+		  this.startX = []
+      for (var i = 0; i < this.max; i++) {
+        let v = this.$refs[this.refNameSt+i][0]
+        this.startX.push(v.$el.offsetLeft)
+        this.startW = v.$el.offsetWidth
+      }
+    },
     methods: {
       // 手指滑动事件回调
       async ontouchmove(e) {
@@ -115,21 +127,41 @@
         // 焦点停留的位置
         let {pageX} = touches[touches.length - 1];
 
-        // 容器计算后属性
-        let {left} = await getClientRect('.rate-box', this);
+        if(pageX<=this.startX[0]){
+          this.toggle(0)
+          return
+        }
+        
+        if(pageX<=(this.startX[0]+this.startW)){
+          this.toggle(1)
+          return
+        }
+        if(pageX>=this.startX[this.startX.length-1]){
+          this.toggle(this.startX.length)
+          return
+        }
+        
+        let cc = this.startX.concat()
+        cc.push(pageX)
+        cc.sort((a,b) => {return a-b})
+        this.toggle(cc.indexOf(pageX))
 
-        // 单个星星元素计算后属性
-        let {width} = await getClientRect('.rate', this);
 
-        let {max} = this;
-        let maxX = max * width + left;
+        // // 容器计算后属性
+        // let {left} = await getClientRect('.rate-box', this);
 
-        // 计算停留在哪个星星上
-        let val = pageX > maxX ? max :          // 超出最右边, 最大星
-          pageX < left ? 0 :                    // 超出最左边, 0 星
-            Math.ceil((pageX - left) / width);  // 计算
+        // // 单个星星元素计算后属性
+        // let {width} = await getClientRect('.rate', this);
 
-        this.toggle(val);
+        // let {max} = this;
+        // let maxX = max * width + left;
+
+        // // 计算停留在哪个星星上
+        // let val = pageX > maxX ? max :          // 超出最右边, 最大星
+        //   pageX < left ? 0 :                    // 超出最左边, 0 星
+        //     Math.ceil((pageX - left) / width);  // 计算
+
+        // this.toggle(val);
       },
       // 点击回调
       onItemClick(e) {
@@ -159,6 +191,7 @@
   .rate-box {
     min-height: 1.4em;
     display: flex;
+    justify-content: space-around;
     align-items: center;
   }
 
