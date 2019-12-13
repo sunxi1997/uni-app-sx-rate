@@ -127,7 +127,6 @@
         for (let i = 0; i < max; i++) {
 
           let selector = `.rate-${i}`;
-
           let {left, width} = await getClientRect(selector, this);
 
           this.startX.push(left);
@@ -136,7 +135,11 @@
       },
 
 
-      // 手指滑动事件回调
+      /**
+       * 手指滑动事件回调
+       * https://github.com/sunxi1997/uni-app-sx-rate/pull/1
+       * 原本的触摸处理在自定了样式后可能会出现bug, 已解决
+       */
       async ontouchmove(e) {
         if (!this.touchMoving) {
           this.touchMoving = true;
@@ -163,9 +166,7 @@
         else if (pageX >= startX[max - 1])
           return this.toggle(max);
 
-        /**
-         * 计算星星停留的位置
-         */
+        //计算星星停留的位置
         let startXHash = startX.concat(pageX).sort((a, b) => a - b);
         this.toggle(startXHash.indexOf(pageX));
       },

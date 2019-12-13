@@ -14,6 +14,8 @@
   activeColor | String | '#FFB700' | 滑选后星星颜色,同css的color
   fontSize | String | 'inherit' | 星星大小,同css的fontSize
   margin | String | '' | 星星间距, 可以是 1em, 10px等(注意,不支持upx)
+  containerClass | String | '' | 容器的自定义类名
+  rateClass | String | '' | 星星的自定义类名
   --- | --- | --- | ---
   @change | EventHandle |  | 星星值变化时回调,event=value
   
@@ -27,3 +29,19 @@
 测试支持H5,微信小程序;
 
 理论支持其他平台,未测试nvue,
+
+
+
+## 更新记录
+
+#### 1.1.0
+
+优化滑动处理
+
+新增属性container-class rate-class
+
+可以自定样式了
+
+#### 1.0.0
+
+初始版本
