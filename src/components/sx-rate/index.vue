@@ -1,7 +1,7 @@
 <template>
   <view
     class="rate-box"
-    :class="{animation}"
+    :class="[{animation},containerClass]"
     @touchmove="ontouchmove"
     @touchend="touchMoving=false"
   >
@@ -10,7 +10,7 @@
       :key="val"
       class="rate"
       :style="{fontSize, paddingLeft: i!==0 ? rateMargin : 0, paddingRight: i<list.length-1 ? rateMargin : 0, color: val<=rateValue ? activeColor : defaultColor}"
-      :class="{scale: !disabled && val<=rateValue && animation && touchMoving}"
+      :class="[{scale: !disabled && val<=rateValue && animation && touchMoving},`rate-${i}`,rateClass]"
       :data-val="val"
       @click="onItemClick"
     >
@@ -65,11 +65,23 @@
         type: String,
         default: ''
       },
+      // 自定义类名-容器
+      containerClass: {
+        type: String,
+        default: ''
+      },
+      // 自定义类名-星星
+      rateClass: {
+        type: String,
+        default: ''
+      }
     },
     data() {
       return {
         rateValue: 0,
-        touchMoving: false
+        touchMoving: false,
+        startX: [],
+        startW: 30
       }
     },
     computed: {
@@ -83,15 +95,16 @@
 
         switch (typeof margin) {
           case "number":
-            margin+='px';
-          case "string": break;
+            margin += 'px';
+          case "string":
+            break;
           default:
             return 0;
         }
 
         let reg = /^(\d+)([^\d]*)/;
         let result = reg.exec(margin);
-        if(!result)
+        if (!result)
           return 0;
 
         let [_, num, unit] = result;
@@ -107,29 +120,54 @@
       }
     },
     methods: {
+      // 计算星星位置
+      async initStartX() {
+        let {max} = this;
+
+        for (let i = 0; i < max; i++) {
+
+          let selector = `.rate-${i}`;
+
+          let {left, width} = await getClientRect(selector, this);
+
+          this.startX.push(left);
+          this.startW = width;
+        }
+      },
+
+
       // 手指滑动事件回调
       async ontouchmove(e) {
-        this.touchMoving = true;
+        if (!this.touchMoving) {
+          this.touchMoving = true;
+          // 开始手指滑动时重新计算星星位置,防止星星位置意外变化
+          await this.initStartX();
+        }
+
+        let {startX, startW, max} = this;
         let {touches} = e;
 
-        // 焦点停留的位置
+        // 触摸焦点停留的位置
         let {pageX} = touches[touches.length - 1];
 
-        // 容器计算后属性
-        let {left} = await getClientRect('.rate-box', this);
 
-        // 单个星星元素计算后属性
-        let {width} = await getClientRect('.rate', this);
+        // 超出最左边, 0 星
+        if (pageX <= startX[0])
+          return this.toggle(0);
 
-        let {max} = this;
-        let maxX = max * width + left;
+        // 刚好在第一颗星
+        else if (pageX <= startX[0] + startW)
+          return this.toggle(1);
 
-        // 计算停留在哪个星星上
-        let val = pageX > maxX ? max :          // 超出最右边, 最大星
-          pageX < left ? 0 :                    // 超出最左边, 0 星
-            Math.ceil((pageX - left) / width);  // 计算
+        // 超出最右边, 最大星
+        else if (pageX >= startX[max - 1])
+          return this.toggle(max);
 
-        this.toggle(val);
+        /**
+         * 计算星星停留的位置
+         */
+        let startXHash = startX.concat(pageX).sort((a, b) => a - b);
+        this.toggle(startXHash.indexOf(pageX));
       },
       // 点击回调
       onItemClick(e) {
@@ -147,6 +185,9 @@
           this.$emit('change', val)
         }
       }
+    },
+    mounted() {
+
     },
   }
 </script>

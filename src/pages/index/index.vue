@@ -63,6 +63,16 @@
       </ul>
     </view>
 
+    <view class="content">
+      <view>自定义类名</view>
+      <sx-rate container-class="my-rate-box" rate-class="my-rate" />
+      <view class="note">可以通过额外的class来调整为自己想要的样式</view>
+      <view class="note">container-class</view>
+      <view class="note">容器样式没有scope问题</view>
+      <view class="note">rate-class</view>
+      <view class="note">指定星星的类名在h5中会受到style的scope属性限制, 可以使用 /deep/ 解决</view>
+    </view>
+
   </view>
 </template>
 
@@ -99,7 +109,7 @@
   }
 </script>
 
-<style>
+<style scoped>
   .container{
     font-size: 40upx;
     line-height: 1.4;
@@ -121,5 +131,32 @@
   .note{
     color: #bbb;
     font-size: 14px;
+  }
+
+  /*rate的容器不受scope限制*/
+  .my-rate-box{
+    justify-content: space-around;
+  }
+
+  /*rate的星星在h5中受scope限制*/
+  .my-rate{
+    animation: scale .2s linear infinite;
+  }
+  /deep/ .my-rate{
+    animation: rotate 2s linear infinite;
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+
+    50%{
+      transform: rotate(360deg);
+    }
+
+    to{
+      transform: rotate(360deg);
+    }
   }
 </style>
