@@ -123,6 +123,7 @@
       // 计算星星位置
       async initStartX() {
         let {max} = this;
+        this.startX = [];
 
         for (let i = 0; i < max; i++) {
 
@@ -133,7 +134,6 @@
           this.startW = width;
         }
       },
-
 
       /**
        * 手指滑动事件回调
